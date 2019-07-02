@@ -29,6 +29,12 @@ public interface Constant {
         String DEBUG_TAG = "abkit.debug.tag";
     }
 
+    interface buildType {
+        String DEBUG = "debug";
+
+        String RELEASE = "release";
+    }
+
     String DEFAULT_GROUP_ID = "";
 
     String OUTPUT_DIR = "abkit";
