@@ -5,9 +5,12 @@ import org.gradle.api.Project
  * @author qinchao
  * @since 2018/11/16
  */
+@Deprecated
 class ModuleManager {
 
     static final String MODULES_FILE_NAME = "modules.xml"
+
+
 
     Map<String, Module> data
 
@@ -18,12 +21,13 @@ class ModuleManager {
 
     ModuleManager(Project project) {
         this.project = project
+        this.handler = ModuleHandler.instance()
     }
 
     void load() {
-        File file = new File(project.getRootDir(), MODULES_FILE_NAME)
-        if (file.exists()) {
-            def result = ModuleXmlParser.parse(file)
+        File moduleXml = new File(project.getRootDir(), MODULES_FILE_NAME)
+        if (moduleXml.exists()) {
+            def result = ModuleXmlParser.parse(moduleXml)
             data = result[0]
             groupIds = result[1]
         } else {
@@ -32,6 +36,8 @@ class ModuleManager {
             printMissConfigurations()
         }
     }
+
+
 
     private static void printMissConfigurations() {
         System.err.println("missing modules.xml, like this:")

@@ -33,6 +33,8 @@ public interface Constant {
         String DEBUG = "debug";
 
         String RELEASE = "release";
+
+        String ALL = "all";
     }
 
     String DEFAULT_GROUP_ID = "";

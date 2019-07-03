@@ -1,32 +1,111 @@
 package chao.android.gradle.plugin.dependencies
 
+import chao.android.gradle.plugin.base.PluginException
+import chao.android.gradle.plugin.util.StringUtils
+
 /**
  * @author qinchao
  * @since 2018/11/14
  */
 class Module {
 
-    String name
+    private String name
 
-    String projectName
+    private String remote
 
-    String artifactId
+    private String project
 
-    String groupId
+    private String buildScope
 
-    String version
+    private String flavorScope
 
-    // remote = artifactId + : + groupId + : + version
-    String remote
+    private boolean useProject
 
-    boolean useProject
+    private String artifactId
 
-    @Override
-    String toString() {
-        return name + " -----> " + projectName + " ----> " + remote + " ---> " + useProject
+    private String groupId
+
+    private String versionName
+
+    String getName() {
+        return name
+    }
+
+    void setName(String name) {
+        this.name = name
+    }
+
+    String getRemote() {
+        return remote
+    }
+
+    void setRemote(String remote) {
+        this.remote = remote
+        if (!StringUtils.isEmpty(remote)) {
+            String[] parts = remote.split(":")
+            if (parts.length != 3) {
+                throw new PluginException("remote dependency format should be [groupId]:[artifactId]:[versionName], like \"chao.android.gradle:abkit:1.0.0\"")
+            }
+            groupId = parts[0]
+            artifactId = parts[1]
+            versionName = parts[2]
+        }
+
     }
 
     String getProject() {
-        return ":" + projectName
+        return project
+    }
+
+    void setProject(String project) {
+        this.project = project
+    }
+
+    String getBuildScope() {
+        return buildScope
+    }
+
+    void setBuildScope(String buildScope) {
+        this.buildScope = buildScope
+    }
+
+    String getFlavorScope() {
+        return flavorScope
+    }
+
+    void setFlavorScope(String flavorScope) {
+        this.flavorScope = flavorScope
+    }
+
+    boolean getUseProject() {
+        return useProject
+    }
+
+    void setUseProject(boolean useProject) {
+        this.useProject = useProject
+    }
+
+    String getArtifactId() {
+        return artifactId
+    }
+
+    void setArtifactId(String artifactId) {
+        this.artifactId = artifactId
+    }
+
+    String getGroupId() {
+        return groupId
+    }
+
+    void setGroupId(String groupId) {
+        this.groupId = groupId
+    }
+
+    String getVersionName() {
+        return versionName
+    }
+
+    void setVersionName(String versionName) {
+        this.versionName = versionName
     }
 }

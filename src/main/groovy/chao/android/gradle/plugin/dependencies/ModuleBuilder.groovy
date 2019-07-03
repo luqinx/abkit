@@ -15,11 +15,17 @@ class ModuleBuilder {
 
     private String project
 
-    private boolean useProject
-
+    /**
+     *  todo
+     */
     private String buildScope
 
+    /**
+     *  todo
+     */
     private String flavorScope
+
+    private boolean useProject
 
     private ModuleHandler handler
 
@@ -42,11 +48,13 @@ class ModuleBuilder {
         return this
     }
 
-    ModuleBuilder useProject(boolean project) {
-        this.useProject = project
-        if (useProject) {
-            handler.project(project)
-        }
+    /**
+     * 将这个project载入到项目
+     * @return
+     */
+    ModuleBuilder include() {
+        handler.project(name, project)
+        useProject = true
         return this
     }
 
@@ -69,4 +77,18 @@ class ModuleBuilder {
         return this
     }
 
+    String getName() {
+        return name
+    }
+
+    Module build() {
+        Module module = new Module()
+        module.name = name
+        module.remote = remote
+        module.useProject = useProject
+        module.project = project
+        module.flavorScope = flavorScope
+        module.buildScope = buildScope
+        return module
+    }
 }

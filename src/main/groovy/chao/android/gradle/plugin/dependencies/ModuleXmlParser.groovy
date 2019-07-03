@@ -7,6 +7,7 @@ import javax.xml.parsers.ParserConfigurationException
  * @author qinchao
  * @since 2018/11/16
  */
+@Deprecated
 class ModuleXmlParser {
 
     static def parse(File file) {
