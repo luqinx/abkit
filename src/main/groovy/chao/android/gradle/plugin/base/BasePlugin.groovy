@@ -5,7 +5,6 @@ import chao.android.gradle.plugin.Constant
 import chao.android.gradle.plugin.util.logger
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
-import org.gradle.internal.impldep.org.jetbrains.annotations.NotNull
 
 abstract class BasePlugin<T extends DefaultExtension> implements IPlugin {
 
@@ -68,7 +67,7 @@ abstract class BasePlugin<T extends DefaultExtension> implements IPlugin {
         this.extensions = extensions
     }
 
-    abstract @NotNull String bindExtensionName()
+    abstract String bindExtensionName()
 
     abstract boolean enabledAsDefault()
 
