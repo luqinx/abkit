@@ -3,6 +3,7 @@ package chao.android.gradle.plugin.dependencies
 import chao.android.gradle.plugin.base.PluginException
 import chao.android.gradle.plugin.util.StringUtils
 import org.gradle.api.initialization.Settings
+import org.gradle.util.TextUtil
 
 import java.util.function.Function
 import java.util.stream.Collectors
@@ -39,7 +40,7 @@ class ModuleHandler {
     }
 
     ModuleBuilder module(String moduleName, String remoteName, String projectName) {
-
+        checkModuleName(moduleName)
         if (StringUtils.isEmpty(moduleName)) {
             throw new PluginException("invilid module: ${moduleName} -> ${remoteName} -> ${projectName}" )
         }
@@ -55,6 +56,7 @@ class ModuleHandler {
     }
 
     ModuleBuilder project(String moduleName, String project) {
+        checkModuleName(moduleName)
         if (StringUtils.isEmpty(project)) {
             throw new PluginException("invilid module: ${moduleName} -> ${project}" )
         }
@@ -68,7 +70,24 @@ class ModuleHandler {
         return moduleBuilder
     }
 
+    ModuleBuilder module(String moduleName) {
+        checkModuleName(moduleName)
+        ModuleBuilder moduleBuilder = builders.get(moduleName)
+        if (!moduleBuilder) {
+            moduleBuilder = new ModuleBuilder(this)
+            builders.put(moduleName, moduleBuilder)
+        }
+        moduleBuilder.name(moduleName)
+        return moduleBuilder
+    }
+
+    ModuleBuilder module(String moduleName, String remoteName) {
+        checkModuleName(moduleName)
+        remote(moduleName, remoteName)
+    }
+
     ModuleBuilder remote(String moduleName, String remoteName) {
+        checkModuleName(moduleName)
         if (StringUtils.isEmpty(remoteName)) {
             throw new PluginException("invalid module: ${moduleName} -> ${remoteName}" )
         }
@@ -89,6 +108,15 @@ class ModuleHandler {
             }
         }).collect(Collectors.toList())
 
+    }
+
+    private static void checkModuleName(String name) {
+        if (StringUtils.isEmpty(name)) {
+            throw new RuntimeException("module name should not be empty.")
+        }
+        if (!name.matches("^[a-zA-Z0-9_]*\$")) {
+            throw new RuntimeException("module name only contains (0-9, a-z, A-Z and _) characters") ///字符
+        }
     }
 
 }
