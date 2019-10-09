@@ -64,7 +64,6 @@ class DependencyPlugin extends BasePlugin {
                     if (module.useProject) {
                         subproject.extensions.add(module.name, project.project(module.project))
                     } else {
-//                        println("${module.name} - ${module.remote}")
                         subproject.extensions.add(module.name, module.remote)
                     }
                 }

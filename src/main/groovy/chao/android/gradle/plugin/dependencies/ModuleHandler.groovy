@@ -3,7 +3,6 @@ package chao.android.gradle.plugin.dependencies
 import chao.android.gradle.plugin.base.PluginException
 import chao.android.gradle.plugin.util.StringUtils
 import org.gradle.api.initialization.Settings
-import org.gradle.util.TextUtil
 
 import java.util.function.Function
 import java.util.stream.Collectors
