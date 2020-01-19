@@ -23,6 +23,8 @@ class ModuleBuilder {
 
     private boolean disabled
 
+    private boolean include
+
     /**
      *  todo
      */
@@ -62,9 +64,12 @@ class ModuleBuilder {
      * @return
      */
     ModuleBuilder include() {
-        handler.project(name, project)
-        handler.settings.include(project)
-        useProject = true
+        include = true
+        if (!disabled) {
+            handler.project(name, project)
+            handler.settings.include(project)
+            useProject = true
+        }
         return this
     }
 
@@ -90,15 +95,17 @@ class ModuleBuilder {
     ModuleBuilder disabled() {
         this.disabled = true
 
-        String projectPath = handler.settings.project(project).toString()
-        ProjectDescriptorRegistry registry = handler.settings.getProjectDescriptorRegistry()
-        DefaultProjectDescriptor descriptor = registry.getProject(projectPath)
-        ProjectDescriptor parentDescriptor = descriptor.getParent()
-        if (parentDescriptor != null) {
-            parentDescriptor.children.remove(descriptor)
+        if (include) {
+            String projectPath = handler.settings.project(project).toString()
+            ProjectDescriptorRegistry registry = handler.settings.getProjectDescriptorRegistry()
+            DefaultProjectDescriptor descriptor = registry.getProject(projectPath)
+            ProjectDescriptor parentDescriptor = descriptor.getParent()
+            if (parentDescriptor != null) {
+                parentDescriptor.children.remove(descriptor)
+            }
+            registry.removeProject(projectPath)
         }
 
-        registry.removeProject(projectPath)
         return this
     }
 
