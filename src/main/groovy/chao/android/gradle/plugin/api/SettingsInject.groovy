@@ -33,17 +33,19 @@ class SettingsInject {
 
     private static File modulesFile
 
+    public static Property props
+
     static void inject(Settings settings, DefaultGradle gradle) {
 
 //        Env.debug(true)
 
-        Property prop = new Property()
-        prop.initStaticProperties(settings.getRootDir())
+        props = new Property()
+        props.initStaticProperties(settings.getRootDir())
 
         String modulesFileName = DEFAULT_MODULES_SETTINGS_FILE
 
-        if (prop.hasProperty(MODULES_SETTINGS_FILE_KEY)) {
-            modulesFileName = prop.propertyResult(MODULES_SETTINGS_FILE_KEY).value
+        if (props.hasProperty(MODULES_SETTINGS_FILE_KEY)) {
+            modulesFileName = props.propertyResult(MODULES_SETTINGS_FILE_KEY).value
             if (!modulesFileName.endsWith(".gradle")) {
                 modulesFileName += ".gradle"
             }
