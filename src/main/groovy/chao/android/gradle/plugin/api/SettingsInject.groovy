@@ -86,7 +86,6 @@ class SettingsInject {
         ScriptHandler scriptHandler = scriptHandlerFactory.create(settingsScriptSource, settingsClassLoaderScope)
         ScriptPlugin configurer = configurerFactory.create(settingsScriptSource, scriptHandler, settingsClassLoaderScope, settings.getRootClassLoaderScope(), true)
         ModuleHandler handler = ModuleHandler.instance()
-        handler.clearCache()
         handler.setSettings(settings)
         configurer.apply(handler)
     }

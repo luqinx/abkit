@@ -118,7 +118,6 @@ class ModuleBuilder {
             println("module disabled because of not match ${property}")
             disabled()
         }
-        return this
     }
 
     ModuleBuilder disabledByProperty(String property) {
@@ -126,7 +125,6 @@ class ModuleBuilder {
                 || SettingsInject.props.propertyResult(property).match('1')) {
             disabled()
         }
-        return this
     }
 
     String getName() {
