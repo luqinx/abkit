@@ -1,8 +1,9 @@
 package chao.android.gradle.plugin.api
 
-
+import chao.android.gradle.plugin.base.Env
 import chao.android.gradle.plugin.base.Property
 import chao.android.gradle.plugin.dependencies.ModuleHandler
+import org.gradle.TaskExecutionRequest
 import org.gradle.api.Action
 import org.gradle.api.initialization.Settings
 import org.gradle.api.initialization.dsl.ScriptHandler
@@ -37,10 +38,52 @@ class SettingsInject {
 
     static void inject(Settings settings, DefaultGradle gradle) {
 
-//        Env.debug(true)
+
+        println(settings.startParameter)
 
         props = new Property()
         props.initStaticProperties(settings.getRootDir())
+
+        String flavorValue = props.propertyResult("abkit.flavors").getValue()
+        String buildTypeValue = props.propertyResult("abkit.buildTypes").getValue()
+
+        def flavors = new HashSet<>()
+        def buildTypes = new HashSet()
+
+        flavors.addAll(flavorValue? flavorValue.split(":"): new String[0])
+        buildTypes.addAll(buildTypeValue? buildTypeValue.split(":"): new String[0])
+
+        buildTypes.add("debug")
+        buildTypes.add("release")
+
+
+        println(flavors)
+        println(buildTypes)
+
+        for (TaskExecutionRequest request:gradle.startParameter.taskRequests) {
+            for (String arg: request.args) {
+                println(arg)
+                //查找flavors
+                for (String flavor: flavors) {
+                    flavor = flavor.toLowerCase()
+                    if (arg != null && arg.toLowerCase().contains(flavor)) {
+                        props.loadFlavorProperties(settings.getRootDir(), flavor)
+                        break
+                    }
+                }
+                //查找buildType
+                for (String buildType: buildTypes) {
+                    buildType = buildType.toLowerCase()
+                    if (arg != null && arg.toLowerCase().contains(buildType)) {
+                        props.loadBuildTypeProperties(settings.getRootDir(), buildType)
+                        break
+                    }
+                }
+            }
+        }
+
+        Env.properties(props)
+
 
         String modulesFileName = DEFAULT_MODULES_SETTINGS_FILE
 
@@ -86,6 +129,7 @@ class SettingsInject {
         ScriptHandler scriptHandler = scriptHandlerFactory.create(settingsScriptSource, settingsClassLoaderScope)
         ScriptPlugin configurer = configurerFactory.create(settingsScriptSource, scriptHandler, settingsClassLoaderScope, settings.getRootClassLoaderScope(), true)
         ModuleHandler handler = ModuleHandler.instance()
+        handler.clearCache()
         handler.setSettings(settings)
         configurer.apply(handler)
     }

@@ -1,5 +1,6 @@
 package chao.android.gradle.plugin
 
+import chao.android.gradle.plugin.api.SettingsInject
 import chao.android.gradle.plugin.assemble.AssemblePlugin
 import chao.android.gradle.plugin.base.Env
 import chao.android.gradle.plugin.base.PluginManager
@@ -31,14 +32,11 @@ class EntryPoint implements Plugin<Project> {
 
         Env.rootProject project
 
-        Property prop = new Property()
-        prop.initStaticProperties(project.rootDir)
-        Env.properties(prop)
-
         project.gradle.addBuildListener(new BuildAdapter() {
             @Override
             void buildFinished(BuildResult buildResult) {
                 Env.properties(null)
+                SettingsInject.props.clear()
             }
         })
         Env.debug(Env.properties.propertyResult(Constant.propertyKey.DEBUGGABLE).booleanValue(false))

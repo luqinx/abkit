@@ -48,12 +48,18 @@ class Property {
 
     private static Properties pluginProperties
 
+    private static Properties buildTypeProperties
+
+    private static Properties flavorProperties
+
 
     Property() {
 
     }
 
-    def initStaticProperties(File rootDir) {
+    def static initStaticProperties(File rootDir) {
+        buildTypeProperties = new Properties()
+        flavorProperties = new Properties()
         try {
             localProperties = new Properties()
             File local = new File(rootDir,"local.properties")
@@ -90,6 +96,30 @@ class Property {
             }
         } catch (Throwable ignored) {
             ignored.printStackTrace()
+        }
+
+    }
+
+    def static loadFlavorProperties(File rootDir, String flavor) {
+        println(" =====> loadFlavorProperties")
+
+        File flavorFile = new File(rootDir, flavor + ".properties")
+        if (flavorFile.exists()) {
+            flavorProperties.load(flavorFile.newInputStream())
+            logger.logd("flavor properties ${flavorProperties}")
+        } else {
+            logger.logd("${flavorFile.path} not exists")
+        }
+    }
+
+    def static loadBuildTypeProperties(File rootDir, String buildType) {
+        println(" =====> loadBuildTypeProperties")
+        File buildTypeFile = new File(rootDir, buildType + ".properties")
+        if (buildTypeFile.exists()) {
+            buildTypeProperties.load(buildTypeFile.newInputStream())
+            logger.logd("flavor properties ${buildTypeProperties}")
+        } else {
+            logger.logd("${buildTypeFile.path} not exists")
         }
     }
 
@@ -144,9 +174,16 @@ class Property {
             return new PropertyResult(property)
         }
 
+        property = gradleProperties.getProperty(key)
+        if (property != null) {
+            return new PropertyResult(property)
+        }
 
-
-        return new PropertyResult(gradleProperties.getProperty(key))
+        property = buildTypeProperties.getProperty(key)
+        if (property != null) {
+            return new PropertyResult(property)
+        }
+        return new PropertyResult(flavorProperties.getProperty(key))
     }
 
     class PropertyResult {
@@ -240,5 +277,18 @@ class Property {
 
     boolean hasProperty(String property) {
         return propertyResult(property).value != null
+    }
+
+    /**
+     * 清除缓存
+     */
+    void clear() {
+        localProperties.clear()
+        gradleProperties.clear()
+        pluginProperties.clear()
+        properties.clear()
+
+        buildTypeProperties.clear()
+        flavorProperties.clear()
     }
 }
