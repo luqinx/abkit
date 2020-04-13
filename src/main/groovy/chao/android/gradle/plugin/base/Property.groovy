@@ -65,9 +65,9 @@ class Property {
             File local = new File(rootDir,"local.properties")
             if (local.exists()) {
                 localProperties.load(local.newInputStream())
-                logger.logd("local properties ${localProperties}")
+                logger.logd("abkit: local properties ${localProperties}")
             } else {
-                logger.logd("${local.path} not exists")
+                logger.logd("abkit: ${local.path} not exists")
             }
         } catch (Throwable ignored) {
             // ignore
@@ -78,9 +78,9 @@ class Property {
             gradleProperties = new Properties()
             if (gradle.exists()) {
                 gradleProperties.load(gradle.newInputStream())
-                logger.logd("gradle properties ${gradleProperties}")
+                logger.logd("abkit: gradle properties ${gradleProperties}")
             } else {
-                logger.logd("${gradle.path} not exists")
+                logger.logd("abkit: ${gradle.path} not exists")
             }
         } catch (Throwable ignored) {
             ignored.printStackTrace()
@@ -90,9 +90,9 @@ class Property {
             pluginProperties = new Properties()
             if (plugin.exists()) {
                 pluginProperties.load(plugin.newInputStream())
-                logger.logd("plugin properties ${pluginProperties}")
+                logger.logd("abkit: plugin properties ${pluginProperties}")
             } else {
-                logger.logd("${plugin.path} not exists")
+                logger.logd("abkit: ${plugin.path} not exists")
             }
         } catch (Throwable ignored) {
             ignored.printStackTrace()
@@ -101,25 +101,22 @@ class Property {
     }
 
     def static loadFlavorProperties(File rootDir, String flavor) {
-        println(" =====> loadFlavorProperties")
-
         File flavorFile = new File(rootDir, flavor + ".properties")
         if (flavorFile.exists()) {
             flavorProperties.load(flavorFile.newInputStream())
-            logger.logd("flavor properties ${flavorProperties}")
+            logger.logd("abkit: flavor properties ${flavorFile.path}: ${flavorProperties}")
         } else {
-            logger.logd("${flavorFile.path} not exists")
+            logger.logd("abkit: ${flavorFile.path} not exists")
         }
     }
 
     def static loadBuildTypeProperties(File rootDir, String buildType) {
-        println(" =====> loadBuildTypeProperties")
         File buildTypeFile = new File(rootDir, buildType + ".properties")
         if (buildTypeFile.exists()) {
             buildTypeProperties.load(buildTypeFile.newInputStream())
-            logger.logd("flavor properties ${buildTypeProperties}")
+            logger.logd("abkit: flavor properties ${buildTypeFile.path}: ${buildTypeProperties}")
         } else {
-            logger.logd("${buildTypeFile.path} not exists")
+            logger.logd("abkit: ${buildTypeFile.path} not exists")
         }
     }
 

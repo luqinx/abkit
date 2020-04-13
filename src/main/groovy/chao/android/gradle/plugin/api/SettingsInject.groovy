@@ -39,8 +39,6 @@ class SettingsInject {
     static void inject(Settings settings, DefaultGradle gradle) {
 
 
-        println(settings.startParameter)
-
         props = new Property()
         props.initStaticProperties(settings.getRootDir())
 
@@ -56,13 +54,13 @@ class SettingsInject {
         buildTypes.add("debug")
         buildTypes.add("release")
 
-
-        println(flavors)
-        println(buildTypes)
-
         for (TaskExecutionRequest request:gradle.startParameter.taskRequests) {
-            for (String arg: request.args) {
-                println(arg)
+            def args = []
+            if (request == null || request.args.size() == 0) {
+                args.add(props.propertyResult('abkit.sync.buildType').value + props.propertyResult('abkit.sync.flavor').value)
+            }
+            for (String arg: args) {
+                println("startParameter.arg: " + arg)
                 //查找flavors
                 for (String flavor: flavors) {
                     flavor = flavor.toLowerCase()
@@ -93,7 +91,7 @@ class SettingsInject {
                 modulesFileName += ".gradle"
             }
         }
-        println("====> " + modulesFileName)
+        println("abkit: modules config file:  " + modulesFileName)
         modulesFile = new File(settings.rootDir, modulesFileName)
 
         gradle.apply(new Action<ObjectConfigurationAction>() {
@@ -129,7 +127,6 @@ class SettingsInject {
         ScriptHandler scriptHandler = scriptHandlerFactory.create(settingsScriptSource, settingsClassLoaderScope)
         ScriptPlugin configurer = configurerFactory.create(settingsScriptSource, scriptHandler, settingsClassLoaderScope, settings.getRootClassLoaderScope(), true)
         ModuleHandler handler = ModuleHandler.instance()
-        handler.clearCache()
         handler.setSettings(settings)
         configurer.apply(handler)
     }

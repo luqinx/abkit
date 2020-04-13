@@ -6,6 +6,7 @@ import chao.android.gradle.plugin.base.Env
 import chao.android.gradle.plugin.base.PluginManager
 import chao.android.gradle.plugin.base.Property
 import chao.android.gradle.plugin.dependencies.DependencyPlugin
+import chao.android.gradle.plugin.dependencies.ModuleHandler
 import chao.android.gradle.plugin.maven.MavenPlugin
 import chao.android.gradle.plugin.normalization.CheckStylePlugin
 import chao.android.gradle.plugin.normalization.JacocoPlugin
@@ -37,6 +38,7 @@ class EntryPoint implements Plugin<Project> {
             void buildFinished(BuildResult buildResult) {
                 Env.properties(null)
                 SettingsInject.props.clear()
+                ModuleHandler.instance().clearCache()
             }
         })
         Env.debug(Env.properties.propertyResult(Constant.propertyKey.DEBUGGABLE).booleanValue(false))

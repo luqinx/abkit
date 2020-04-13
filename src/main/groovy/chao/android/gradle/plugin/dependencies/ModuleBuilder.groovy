@@ -1,6 +1,7 @@
 package chao.android.gradle.plugin.dependencies
 
 import chao.android.gradle.plugin.Constant
+import chao.android.gradle.plugin.api.ABKit
 import chao.android.gradle.plugin.api.SettingsInject
 import org.gradle.api.Project
 import org.gradle.api.initialization.ProjectDescriptor
@@ -113,9 +114,13 @@ class ModuleBuilder {
     }
 
     ModuleBuilder enabledByProperty(String property) {
-        if (!SettingsInject.props.propertyResult(property).match('true')) {
-            println("module disabled because of not match ${property}")
+        println("${property} is ${SettingsInject.props.propertyResult(property).value}")
+
+        if (!SettingsInject.props.propertyResult(property).match('true') ) {
+            println("abkit: module disabled because of not match ${property}")
             disabled()
+        } else {
+            println("abkit: module enabled because of match ${property}")
         }
         return this
     }
