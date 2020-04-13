@@ -54,13 +54,14 @@ class SettingsInject {
         buildTypes.add("debug")
         buildTypes.add("release")
 
+
         for (TaskExecutionRequest request:gradle.startParameter.taskRequests) {
-            def args = []
+            def args = request.args
             if (request == null || request.args.size() == 0) {
-                args.add(props.propertyResult('abkit.sync.buildType').value + props.propertyResult('abkit.sync.flavor').value)
+                args = []
+                args.add(props.propertyResult('abkit.sync.flavor').value + props.propertyResult('abkit.sync.buildType').value)
             }
             for (String arg: args) {
-                println("startParameter.arg: " + arg)
                 //查找flavors
                 for (String flavor: flavors) {
                     flavor = flavor.toLowerCase()
