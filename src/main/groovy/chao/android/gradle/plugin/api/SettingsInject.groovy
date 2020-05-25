@@ -20,6 +20,7 @@ import org.gradle.internal.resource.BasicTextResourceLoader
 import org.gradle.internal.resource.TextResource
 import org.gradle.invocation.DefaultGradle
 
+import java.lang.reflect.Array
 import java.lang.reflect.Field
 
 /**
@@ -54,13 +55,20 @@ class SettingsInject {
         buildTypes.add("debug")
         buildTypes.add("release")
 
-
-        for (TaskExecutionRequest request:gradle.startParameter.taskRequests) {
-            def args = request.args
+        List<TaskExecutionRequest> requests = new ArrayList<>(gradle.startParameter.taskRequests)
+        if (requests.size() == 0) {
+            requests.add(null)
+        }
+        for (TaskExecutionRequest request:requests) {
+            def args
             if (request == null || request.args.size() == 0) {
                 args = []
                 args.add(props.propertyResult('abkit.sync.flavor').value + props.propertyResult('abkit.sync.buildType').value)
+                println("abkit: startParameter request is empty, add config request args:" + args)
+            } else {
+                args = request.args
             }
+            println("abkit: startParameter request args: ${args}")
             for (String arg: args) {
                 //查找flavors
                 for (String flavor: flavors) {
