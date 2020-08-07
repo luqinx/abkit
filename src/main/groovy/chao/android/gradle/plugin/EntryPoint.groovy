@@ -31,6 +31,12 @@ class EntryPoint implements Plugin<Project> {
             return
         }
 
+        if (SettingsInject.props  == null) {
+            SettingsInject.props = new Property()
+            SettingsInject.props.initStaticProperties(project.rootDir)
+            Env.properties(SettingsInject.props)
+        }
+
         Env.rootProject project
 
         project.gradle.addBuildListener(new BuildAdapter() {
