@@ -149,7 +149,9 @@ class SettingsInject {
             ScriptSource settingsScriptSource = new TextResourceScriptSource(settingsResource)
             ClassLoaderScope settingsClassLoaderScope = settings.getClassLoaderScope()
             ScriptHandler scriptHandler = scriptHandlerFactory.create(settingsScriptSource, settingsClassLoaderScope)
-            ScriptPlugin configurer = configurerFactory.create(settingsScriptSource, scriptHandler, settingsClassLoaderScope, settings.getRootClassLoaderScope(), true)
+
+            ClassLoaderScope classLoaderScope = settingsClassLoaderScope.createChild("script-module-inject")
+            ScriptPlugin configurer = configurerFactory.create(settingsScriptSource, scriptHandler, classLoaderScope, settings.getRootClassLoaderScope(), true)
             ModuleHandler handler = ModuleHandler.instance()
             handler.setSettings(settings)
             configurer.apply(handler)
