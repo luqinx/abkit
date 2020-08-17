@@ -16,9 +16,9 @@ import org.gradle.configuration.ScriptPlugin
 import org.gradle.configuration.ScriptPluginFactory
 import org.gradle.groovy.scripts.ScriptSource
 import org.gradle.groovy.scripts.TextResourceScriptSource
-import org.gradle.internal.resource.BasicTextResourceLoader
 import org.gradle.internal.resource.TextResource
 import org.gradle.invocation.DefaultGradle
+import org.gradle.util.GradleVersion
 
 import java.lang.reflect.Field
 
@@ -36,8 +36,10 @@ class SettingsInject {
 
     public static Property props
 
-    static void inject(Settings settings, DefaultGradle gradle) {
+    private static final VERSION_6 = GradleVersion.version("6.0")
 
+    static void inject(Settings settings, DefaultGradle gradle) {
+        println("abkit: current gradle version: " + GradleVersion.current())
 
         props = new Property()
         props.initStaticProperties(settings.getRootDir())
@@ -91,7 +93,7 @@ class SettingsInject {
             }
         }
 
-        Env.properties(props)
+        Env.setProperties(props)
 
 
         List<String> modulesFileNames = new ArrayList<>()
@@ -145,13 +147,20 @@ class SettingsInject {
 
     private static void applySettingsScript(ScriptHandlerFactory scriptHandlerFactory, ScriptPluginFactory configurerFactory, final SettingsInternal settings) {
         for (File modulesFile: modulesFiles) {
-            TextResource settingsResource = (new BasicTextResourceLoader()).loadFile(modulesFile.getName(), modulesFile)
+            TextResource settingsResource
+            if (GradleVersion.current() >= VERSION_6) {
+                Class<?> resourceLoaderClass = Class.forName("org.gradle.internal.resource.DefaultTextFileResourceLoader")
+                settingsResource = resourceLoaderClass.newInstance().loadFile(modulesFile.getName(), modulesFile)
+            } else {
+                Class<?> resourceLoaderClass = Class.forName("org.gradle.internal.resource.BasicTextResourceLoader")
+                settingsResource = resourceLoaderClass.newInstance().loadFile(modulesFile.getName(), modulesFile)
+            }
             ScriptSource settingsScriptSource = new TextResourceScriptSource(settingsResource)
             ClassLoaderScope settingsClassLoaderScope = settings.getClassLoaderScope()
             ScriptHandler scriptHandler = scriptHandlerFactory.create(settingsScriptSource, settingsClassLoaderScope)
 
             ClassLoaderScope classLoaderScope = settingsClassLoaderScope.createChild("script-module-inject")
-            ScriptPlugin configurer = configurerFactory.create(settingsScriptSource, scriptHandler, classLoaderScope, settings.getRootClassLoaderScope(), true)
+            ScriptPlugin configurer = configurerFactory.create(settingsScriptSource, scriptHandler, classLoaderScope, settingsClassLoaderScope, true)
             ModuleHandler handler = ModuleHandler.instance()
             handler.setSettings(settings)
             configurer.apply(handler)

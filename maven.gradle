@@ -4,10 +4,19 @@ Properties props = new Properties()
 File file = new File(project.projectDir, "maven.properties")
 props.load(new FileInputStream(file))
 
+
+final String USER_HOME = System.getProperty("user.home")
+
+def LOCAL_URL = "file://$USER_HOME/.m2/repository/"
+
 def RELEASE = Boolean.parseBoolean(props.get("publishRelease"))
+def PUBLISH_LOCAL = Boolean.parseBoolean(props.get("publish2Local"))
 def MAVEN_LOCAL_PATH = RELEASE ? props.get("nexusUrl") : props.get("nexusSnapshotUrl")
 
-File localFile = new File(project.rootDir, "local.properties")
+def UPLOAD_PATH = PUBLISH_LOCAL ? LOCAL_URL : MAVEN_LOCAL_PATH
+
+
+        File localFile = new File(project.rootDir, "local.properties")
 if (localFile.exists()) {
     props.load(new FileInputStream(localFile))
 }
@@ -18,6 +27,8 @@ def PASSWORD = props.get("nexusPassword")
 
 def ADMIN_ACCOUNT = props.get("adminUserName")
 def ADMIN_PASSWORD = props.get("adminPassword")
+
+
 
 
 uploadArchives.doFirst {
@@ -32,14 +43,15 @@ uploadArchives.doFirst {
 
 //脚本：将Lib打成aar包上传至maven私有库
 uploadArchives {
+    def PUBLISH_VERSION = RELEASE ? VERSION_NAME : (VERSION_NAME + "-SNAPSHOT")
     repositories {
         mavenDeployer {
             //非release版本自动追加-SNAPSHOT后缀
-            def PUBLISH_VERSION = RELEASE ? VERSION_NAME : (VERSION_NAME + "-SNAPSHOT")
             def PUBLISH_ACCOUNT = ADMIN_ACCOUNT ? ADMIN_ACCOUNT : ACCOUNT
             def PUBLISH_PASSWORD = ADMIN_PASSWORD ? ADMIN_PASSWORD : PASSWORD
-            repository(url:MAVEN_LOCAL_PATH ){
-                authentication(userName: PUBLISH_ACCOUNT, password: PUBLISH_PASSWORD)}
+            repository(url: UPLOAD_PATH) {
+                authentication(userName: PUBLISH_ACCOUNT, password: PUBLISH_PASSWORD)
+            }
             pom.project {
                 groupId GROUP_ID
                 artifactId ARTIFACT_ID
@@ -47,5 +59,12 @@ uploadArchives {
                 packaging 'aar'
             }
         }
+    }
+
+    doFirst {
+        println("准备打包上传...")
+        println("版本名称: ${GROUP_ID}:${ARTIFACT_ID}:${PUBLISH_VERSION}" )
+        println("发布类型:" + (RELEASE ? "release" : "snapshot"))
+        println("本地仓库:" + PUBLISH_LOCAL)
     }
 }
