@@ -6,8 +6,8 @@ dependencies {
     implementation localGroovy()
 
     //以下是autoservice的依赖
-    implementation ('com.android.tools.build:gradle:3.3.2')
-    implementation 'com.android.tools.build:gradle-api:3.2.1'
+    implementation ('com.android.tools.build:gradle:4.0.1')
+    implementation 'com.android.tools.build:gradle-api:4.0.1'
     implementation 'org.ow2.asm:asm:5.1'
     implementation 'org.ow2.asm:asm-util:5.1'
     implementation 'org.ow2.asm:asm-commons:5.1'
@@ -16,7 +16,7 @@ dependencies {
 ext {
     GROUP_ID="chao.android.gradle" //改成你的groupId
     ARTIFACT_ID="abkit"  //改成你的artifactId
-    VERSION_NAME="0.0.5"      //改成你的版本号
+    VERSION_NAME="1.0.0.gradle6"      //改成你的版本号
 }
 apply from: 'maven.gradle'
 
