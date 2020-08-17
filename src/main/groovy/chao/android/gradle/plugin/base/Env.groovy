@@ -34,7 +34,7 @@ class Env {
         return rootProperties
     }
 
-    static void properties(Property property) {
+    static void setProperties(Property property) {
         rootProperties = property
     }
 }
