@@ -107,7 +107,8 @@ abkit {
 
 **带着上面的问题，下面介绍这种新的组件依赖管理模式:**
 
-第一步，在settings.gradle中使用SettingsInject来接管settings.gradle!!!
+
+第一步，在settings.gradle中使用SettingsInject注入，用modules.gradle来接管settings.gradle!!!
 
 ```
 import chao.android.gradle.plugin.api.SettingsInject  //会报红，编译时不报错就不影响使用
@@ -117,7 +118,8 @@ include ":app"
 
 ```
 
-接管settings.gradle后，settings.gradle原有功能不受影响，还可以继续使用。只是扩展了一个新的配置脚本modules.gradle
+接管settings.gradle后，settings.gradle原有功能不受影响，还可以继续使用。只是扩展了一个新的配置脚本modules.gradle。
+
 
 第二步，
 在settings.gradle同级目录下新增modules.gradle,modules.gradle使用如下方式来配置modules:
@@ -143,7 +145,18 @@ module("servicepool_android")
     
 ```
 
-modules配置好以后就可以在build.gradle中被引用了。 
+modules.gradle可以通过链式结构来配置一个module
+1. 以module方法开始，参数为module名称，名称可以自由定义。
+2. remote方法定义了一个远程依赖，默认使用远程依赖
+3. project()方法表示当前module定义了一个project，project必须使用include()方法后才会装载并使用
+4. include()方法表示装载一个project, 操作等价于settings.gradle中的include。
+   调用了include(),将使用project依赖而不是remote依赖
+5. disabled()方法表示禁用当前module，
+   module被禁用后，module名称依然可以在build.gradle中被引用，但是实际引用的是一个空组件。
+   
+
+
+modules配置好以后就可以在build.gradle中被引用了。
 
 第三步， 在app或者其他module的dependencies{}中引入依赖。
 
@@ -181,13 +194,57 @@ module("sampleLib").project(":sample_lib").include()
 
 **总结**
 
+modules.gradle使用新的方式来装载projects，modules中配置的module不需要再在settings.gradle中使用include引入。
+
+接管settings.gradle前装载一个project
+```
+/**
+ * settings.gradle中装载
+ */
+include ":servicepool"
+```
+
+```
+/**
+ *  module的build.gradle中引入
+ */
+ 
+ ...
+ dependencies {
+    implementation project(":servicepool")
+ }
+```
+
+
+接管settings.gradle后，装载一个project
+
+```
+/**
+ *  modules.gradle 中配置和装载
+ */
+
+module("servicepool").project(":servicepool").include()
+```
+
+```
+/**
+ *  module的build.gradle中引入
+ */
+ 
+ ...
+ dependencies {
+    implementation servicepool  //使用配置的名称即可
+ }
+```
+
+
 abkit的组件依赖管理模式是:
 所有组件的配置都放到了modules.gradle文件中,在build.gradle的depencencies{}中引用时，直接引用modules.gradle中配置的module名称即可。如果是远程组件，
 组件的版本号是modules.gradle中module配置的版本号。module可以自由的在project依赖和远程aar依赖之间切换。很容易禁用或启用某个module。
 
 
-
 ### gradle 调试方法
 
+``` 
 export GRADLE_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"
-
+```
