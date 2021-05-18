@@ -45,12 +45,14 @@ class Module {
         this.remote = remote
         if (!StringUtils.isEmpty(remote)) {
             String[] parts = remote.split(":")
-            if (parts.length != 3) {
+            if (parts.length < 2) {
                 throw new PluginException("remote dependency format should be [groupId]:[artifactId]:[versionName], like \"chao.android.gradle:abkit:1.0.0\"")
             }
             groupId = parts[0]
             artifactId = parts[1]
-            versionName = parts[2]
+            if (parts.length > 2) {
+                versionName = parts[2]
+            }
         }
 
     }
@@ -109,6 +111,7 @@ class Module {
 
     void setVersionName(String versionName) {
         this.versionName = versionName
+        this.remote = "$groupId:$artifactId:$versionName"
     }
 
     boolean getDisabled() {
@@ -117,5 +120,36 @@ class Module {
 
     void setDisabled(boolean disabled) {
         this.disabled = disabled
+    }
+
+    boolean equals(o) {
+        if (this.is(o)) return true
+        if (getClass() != o.class) return false
+
+        Module module = (Module) o
+
+        if (artifactId != module.artifactId) return false
+        if (groupId != module.groupId) return false
+
+        return true
+    }
+
+    int hashCode() {
+        int result
+        result = (artifactId != null ? artifactId.hashCode() : 0)
+        result = 31 * result + (groupId != null ? groupId.hashCode() : 0)
+        return result
+    }
+
+
+    @Override
+    public String toString() {
+        return "Module{" +
+                "name='" + name + '\'' +
+                ", remote='" + remote + '\'' +
+                ", project='" + project + '\'' +
+                ", useProject=" + useProject +
+                ", disabled=" + disabled +
+                '}';
     }
 }
