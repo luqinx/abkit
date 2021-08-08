@@ -98,10 +98,7 @@ abstract class BasePlugin<T extends DefaultExtension> implements IPlugin {
     }
 
     def logd(Object log) {
-        def debuggable = extension.getProperty(Constant.propertyKey.DEBUGGABLE)
-        new Property.PropertyResult(debuggable).match(true) {
-            logger.logd(log)
-        }
+        logger.logd(log)
     }
 
 }

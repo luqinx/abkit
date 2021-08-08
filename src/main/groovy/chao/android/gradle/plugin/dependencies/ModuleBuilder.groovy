@@ -1,13 +1,9 @@
 package chao.android.gradle.plugin.dependencies
 
 import chao.android.gradle.plugin.Constant
-import chao.android.gradle.plugin.api.ABKit
 import chao.android.gradle.plugin.api.SettingsInject
-import org.gradle.api.Project
 import org.gradle.api.initialization.ProjectDescriptor
-import org.gradle.api.internal.project.DefaultProjectRegistry
 import org.gradle.initialization.DefaultProjectDescriptor
-import org.gradle.initialization.DefaultProjectDescriptorRegistry
 import org.gradle.initialization.ProjectDescriptorRegistry
 
 /**
@@ -24,8 +20,6 @@ class ModuleBuilder {
     private String project
 
     private boolean disabled = false
-
-    private boolean include = false
 
     /**
      *  todo
@@ -47,7 +41,6 @@ class ModuleBuilder {
 
     ModuleBuilder name(String name) {
         this.name = name
-        this.useProject = false
         return this
     }
 
@@ -66,12 +59,28 @@ class ModuleBuilder {
      * @return
      */
     ModuleBuilder include() {
-        include = true
         if (!disabled) {
-            handler.project(name, project)
-            handler.settings.include(project)
+//            handler.project(name, project)
+            handler.settings.include(handler.moduleParent + project)
             useProject = true
         }
+        return this
+    }
+
+    ModuleBuilder exclude() {
+        if (useProject) {
+            ProjectDescriptorRegistry registry = handler.settings.getProjectDescriptorRegistry()
+            DefaultProjectDescriptor projectDescriptor = registry.getProject(handler.moduleParent + project)
+            if (projectDescriptor != null) {
+                String projectPath = projectDescriptor.toString()
+                ProjectDescriptor parentDescriptor = projectDescriptor.getParent()
+                if (parentDescriptor != null) {
+                    parentDescriptor.children.remove(projectDescriptor)
+                }
+                registry.removeProject(projectPath)
+            }
+        }
+        useProject = false
         return this
     }
 
@@ -96,20 +105,7 @@ class ModuleBuilder {
 
     ModuleBuilder disabled() {
         this.disabled = true
-
-        if (include) {
-            ProjectDescriptorRegistry registry = handler.settings.getProjectDescriptorRegistry()
-            DefaultProjectDescriptor projectDescriptor = registry.getProject(project)
-            if (projectDescriptor != null) {
-                String projectPath = projectDescriptor.toString()
-                ProjectDescriptor parentDescriptor = projectDescriptor.getParent()
-                if (parentDescriptor != null) {
-                    parentDescriptor.children.remove(projectDescriptor)
-                }
-                registry.removeProject(projectPath)
-            }
-        }
-
+        exclude()
         return this
     }
 
@@ -146,7 +142,7 @@ class ModuleBuilder {
         module.name = name
         module.remote = remote
         module.useProject = useProject
-        module.project = project
+        module.project = handler.moduleParent + project
         module.flavorScope = flavorScope
         module.buildScope = buildScope
         module.disabled = disabled
