@@ -3,5 +3,7 @@
 .gradle/
 *.iml
 local.properties
+.project
+.classpath
 
 src/main/groovy/chao/android/gradle/servicepool

@@ -6,6 +6,7 @@ import chao.android.gradle.plugin.base.BasePlugin
 import chao.android.gradle.plugin.util.StringUtils
 import org.gradle.api.Project
 
+import java.util.concurrent.CountDownLatch
 import java.util.stream.Collectors
 
 /**
@@ -21,12 +22,9 @@ class DependencyPlugin extends BasePlugin {
 
     private static final String EMPTY_REMOTE_MODULE = "chao.java.tools:empty:1.0.0"
 
-    private static final String MODULE_VERSION_BY_MAVEN = "VERSION_BY_MAVEN"
-
     private ModuleHandler handler
 
     private List<Module> modules
-
 
     DependencyPlugin(Project project) {
         super(project)
@@ -44,75 +42,56 @@ class DependencyPlugin extends BasePlugin {
         }
 
         def unVersionModules = modules.stream().filter { module ->
-            StringUtils.isEmpty(module.versionName)
+            StringUtils.isEmpty(module.versionName) && !module.useProject
         }.collect(Collectors.toList())
 
         modules.removeAll(unVersionModules)
 
+        def versionDone = unVersionModules.size() == 0
+//        println("  unversion ------> $versionDone   ${unVersionModules.size()}    ${unVersionModules}")
+
         getProject().rootProject.subprojects { subproject ->
-            def firstSubProject = true // 根工程下的第一个子project，及com.android.application对应的project
             subproject.beforeEvaluate {
-                def versionDone = unVersionModules.size() == 0
-                subproject.configurations.whenObjectAdded { configuration ->
-                    configuration.getDependencies().whenObjectAdded { dependency ->
-                        if (versionDone) {
-                            return
-                        }
-                        def targetModule = unVersionModules.find { m ->
-                            m.groupId == dependency.group && m.artifactId == dependency.name
-                        }
-                        if (targetModule) {
-                            targetModule.versionName = dependency.version
-                            unVersionModules.remove(targetModule)
-                            modules.add(targetModule)
-                            logd("abkit: unversion module matches: $module")
-                        }
-                    }
-                }
-
+                println("before evaluate  ${subproject}")
                 if (versionDone) {
-                    //使用Module名作为依赖入口名, xxxx
-                    for (Module module : modules) {
-                        def orgName = subproject.extensions.findByName(module.name)
-                        if (orgName) {
-                            println("??????? ====> " + orgName)
-                            continue
-                        }
-                        if (module.disabled) {
-                            subproject.extensions.add(module.name, EMPTY_REMOTE_MODULE)
-                        } else if (module.useProject) {
-                            subproject.extensions.add(module.name, project.project(module.project))
-                        } else {
-                            if (!module.remote) {
-                                throw new NullPointerException("${module.name} is in remote mode, but remote aar is not configuration.")
+                    configureDependency(subproject)
+                } else {
+                    subproject.configurations.whenObjectAdded { configuration ->
+                        if (versionDone) { return }
+                        configuration.getDependencies().whenObjectAdded { dependency ->
+                            if (versionDone) { return }
+
+                            // 第一个子project才应该走到这里, 第一个project是com.android.application对应的project
+                            def targetModule = unVersionModules.find { m ->
+                                m.groupId == dependency.group && m.artifactId == dependency.name
                             }
-                            subproject.extensions.add(module.name, module.remote)
+                            if (targetModule) {
+                                targetModule.versionName = dependency.version
+                                unVersionModules.remove(targetModule)
+                                modules.add(targetModule)
+                                println("abkit: unversion module matches: ${targetModule.remote}")
+                            }
+                            versionDone = unVersionModules.size() == 0
+                            if (versionDone) {
+                                configureDependency(subproject)
+                            }
                         }
                     }
-                } else if (!firstSubProject) {
-                    throw new IllegalStateException("There are non-version modules: $unVersionModules")
                 }
-
-                firstSubProject = false
-
-//                afterEvaluate {
-//                    project.configurations.each { configuration ->
-//                        configuration.getDependencies().each { dependency ->
-//                            println("after $project -----------> ${dependency.group}:${dependency.name}:${dependency.version}")
-//                        }
-//                    }
-//                }
-
-
             }
 
-
             subproject.afterEvaluate {
-//                println("-----------------------> ${subproject.path}")
-
-//                if (subproject.hasProperty("upInfo")) {
-//                    println("-----------------------> ${subproject.upInfo.version}")
-//                }
+                println("after evaluate  ${subproject}")
+                if (!versionDone) {
+                    throw new IllegalStateException("There are non-version modules: $unVersionModules")
+                }
+                modules.forEach {
+                    if (!it.useProject && StringUtils.isEmpty(it.remote)) {
+                        throw new IllegalStateException("abkit: ${it.name} use remote dependency but remote config is empty!!")
+                    } else if (it.useProject && StringUtils.isEmpty(it.project)) {
+                        throw new IllegalStateException("abkit: ${it.name} use project dependency but project config is empty!!")
+                    }
+                }
 
                 //依赖替换方案
                 //详见: https://docs.gradle.org/current/dsl/org.gradle.api.artifacts.ResolutionStrategy.html
@@ -142,6 +121,30 @@ class DependencyPlugin extends BasePlugin {
             }
         }
 
+    }
+
+    private void configureDependency(Project subproject) {
+//        println("abkit: configure dependency for $subproject")
+        //使用Module名作为依赖入口名, xxxx
+        for (Module module : modules) {
+            def orgName = subproject.extensions.findByName(module.name)
+            if (orgName) {
+                println("??????? ====> " + orgName)
+                continue
+            }
+            Object result
+            if (module.disabled) {
+                result = EMPTY_REMOTE_MODULE
+            } else if (module.useProject) {
+                result = project.project(module.project)
+            } else {
+                if (!module.remote) {
+                    throw new NullPointerException("${module.name} is in remote mode, but remote aar is not configuration.")
+                }
+                result = module.remote
+            }
+            subproject.extensions.add(module.name, result)
+        }
     }
 
 
