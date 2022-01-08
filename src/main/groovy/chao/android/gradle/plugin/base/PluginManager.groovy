@@ -25,7 +25,7 @@ class PluginManager {
             project.extensions.add(Constant.extension.AC, extensionContainer)
         }
 
-        rootProject.extensions.create("acUtil", UtilExtension, )
+        rootProject.extensions.create("abUtil", UtilExtension, )
 
         plugins.each { pluginClass ->
 

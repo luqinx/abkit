@@ -15,11 +15,6 @@ dependencies {
 
 }
 
-ext {
-    GROUP_ID="chao.android.gradle" //改成你的groupId
-    ARTIFACT_ID="abkit"  //改成你的artifactId
-    VERSION_NAME="1.0.1.gradle6"      //改成你的版本号
-}
 apply from: 'maven.gradle'
 
 repositories {
@@ -27,6 +22,3 @@ repositories {
     jcenter()
     mavenCentral()
 }
-
-group="chao.android.gradle"
-

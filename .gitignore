@@ -6,4 +6,6 @@ local.properties
 .project
 .classpath
 
+*.gpg
+
 src/main/groovy/chao/android/gradle/servicepool

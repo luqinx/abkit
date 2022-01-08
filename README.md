@@ -1,5 +1,8 @@
 ## Android Build Kit 使用说明
 
+[![](https://jitpack.io/v/luqinx/abkit.svg)](https://jitpack.io/#luqinx/abkit)
+
+
 **项目根目录的build.gradle添加**
 
 
@@ -11,12 +14,12 @@ buildscript {
 
     repositories {
         ...
-        maven { url "http://47.99.188.223:8081/repository/maven-public/" } // 2. 仓库地址
+        maven { url 'https://jitpack.io' } // 2. 仓库地址
     }
     
     dependencies {
         ...
-        classpath "chao.android.gradle:abkit:0.0.2"  // 3. 引入插件jar
+        classpath 'com.github.luqinx:abkit:1.1.0'  // 3. 引入插件jar
     }
 }
 ```
