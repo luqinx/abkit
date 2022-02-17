@@ -7,8 +7,8 @@ dependencies {
     implementation localGroovy()
 
     //以下是autoservice的依赖
-    implementation ('com.android.tools.build:gradle:4.0.1') //gradle6版本必须升级到4.0.1, 否则会有api不兼容
-    implementation 'com.android.tools.build:gradle-api:4.0.1'
+    implementation 'com.android.tools.build:gradle:4.1.0' //gradle6版本必须升级到4.0.1, 否则会有api不兼容
+    implementation 'com.android.tools.build:gradle-api:4.1.0'
     implementation 'org.ow2.asm:asm:5.1'
     implementation 'org.ow2.asm:asm-util:5.1'
     implementation 'org.ow2.asm:asm-commons:5.1'
@@ -18,7 +18,7 @@ dependencies {
 apply from: 'maven.gradle'
 
 repositories {
-    google()
-    jcenter()
+    maven { url 'http://maven.aliyun.com/nexus/content/groups/public/'}
     mavenCentral()
+    google()
 }
